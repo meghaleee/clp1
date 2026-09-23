@@ -112,12 +112,14 @@ export default function RequestCallbackSheet({
     >
       {step === "form" ? (
         <>
+          {/* "Want to learn more..." heading — font size 20px, color = NAVY */}
           <div style={{ textAlign: "center", marginBottom: 16 }}>
             <p style={{ fontSize: 20, fontWeight: 600, color: NAVY, lineHeight: 1.35, margin: 0 }}>
               Want to learn more about {productName}? Call us at
             </p>
           </div>
 
+          {/* Phone number box — light-purple background (#f4f2f8), phone number text = 24px */}
           <a
             href="tel:18002671800"
             style={{
@@ -130,16 +132,19 @@ export default function RequestCallbackSheet({
             <span style={{ fontSize: 24, fontWeight: 600, color: NAVY }}>1800 267 1800</span>
           </a>
 
+          {/* "OR" divider line — two thin bars either side of the word */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
             <span style={{ flex: 1, height: 1, background: BORDER }} />
             <span style={{ fontSize: 12, color: GRAY, opacity: 0.8 }}>OR</span>
             <span style={{ flex: 1, height: 1, background: BORDER }} />
           </div>
 
+          {/* "Request a Callback" sub-heading — font size 16px */}
           <p style={{ fontSize: 16, fontWeight: 600, color: "#111", textAlign: "center", margin: "0 0 16px" }}>
             Request a Callback
           </p>
 
+          {/* First Name / Last Name — side by side, equal width, 12px gap between them */}
           <div className="sheet-field" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 8 }}>
             <div className="input-wrap">
               <span className="float-label">First Name<span className="req">*</span></span>
@@ -162,6 +167,7 @@ export default function RequestCallbackSheet({
           </div>
           <div className="sheet-help" style={{ marginTop: -4 }}>As per Govt. ID proof</div>
 
+          {/* Mobile field — same 56px height as other fields, +91 prefix on the left */}
           <div className="sheet-field" style={{ marginTop: 16 }}>
             <div className="input-wrap">
               <span className="float-label">Mobile<span className="req">*</span></span>
@@ -186,6 +192,9 @@ export default function RequestCallbackSheet({
             <ShieldGlyph /> We don&apos;t spam
           </div>
 
+          {/* Consent checkbox — checkbox is 16x16px, text is 12px grey. Text is
+              copied verbatim from the hero form on SBILifePage.tsx, keep them
+              matching if this ever needs to change. */}
           <label style={{ display: "flex", gap: 10, alignItems: "flex-start", cursor: "pointer", marginTop: 20 }}>
             <input
               type="checkbox"
