@@ -7,7 +7,7 @@ const GRAY = "#6f6f6f";
 
 /* Same tiny helper SBILifePage uses for its own feature icons —
    `name` maps to /public/icons/<name>.svg. */
-const Icon = ({ name, size = 24 }: { name: string; size?: number }) => (
+const Icon = ({ name, size = 60 }: { name: string; size?: number }) => (
   <img
     src={`./icons/${name}.svg`}
     alt=""
