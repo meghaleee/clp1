@@ -10,7 +10,10 @@ const GRAY = "#6f6f6f";
 export interface BottomSheetProps {
   open: boolean;
   onClose: () => void;
-  title: ReactNode;
+  /** Omit to skip the title block entirely (e.g. a sheet with its own custom sticky sub-header). */
+  title?: ReactNode;
+  /** Falls back to `title` when it's a string. Set this when there's no title block but the sheet still needs a label. */
+  ariaLabel?: string;
   subtitle?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
@@ -40,6 +43,7 @@ export default function BottomSheet({
   open,
   onClose,
   title,
+  ariaLabel,
   subtitle,
   children,
   footer,
@@ -104,29 +108,6 @@ export default function BottomSheet({
       pushedRef.current = false;
     };
   }, [open, historyEntry, onClose]);
-
-  /* ---- iOS keyboard ----
-     Safari shrinks only the VISUAL viewport, so a bottom-anchored sheet
-     would sit behind the keyboard. Measure the overlap, hand it to CSS. */
-  useEffect(() => {
-    if (!open) return;
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const sync = () => {
-      const overlap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      sheetRef.current?.style.setProperty(
-        "--sheet-kb",
-        `${overlap < 90 ? 0 : Math.round(overlap)}px`
-      );
-    };
-    sync();
-    vv.addEventListener("resize", sync);
-    vv.addEventListener("scroll", sync);
-    return () => {
-      vv.removeEventListener("resize", sync);
-      vv.removeEventListener("scroll", sync);
-    };
-  }, [open]);
 
   /* ---- focus in on open, restore on close, trap while inside ---- */
   useEffect(() => {
@@ -259,16 +240,17 @@ export default function BottomSheet({
         }
 
         .sheet {
-          --sheet-kb: 0px;
           --sheet-y: 0px;
-          position: absolute; left: 0; right: 0; bottom: var(--sheet-kb);
+          position: absolute; left: 0; right: 0; bottom: 0;
           z-index: 1101;
           display: flex; flex-direction: column;
           /* the design is ~660 on a 390x844 handset; derived from the live
-             viewport so the dimmed strip stays tappable on shorter devices
-             and once the keyboard is up */
-          max-height: min(660px, calc(100vh - var(--sheet-kb) - 40px));
-          max-height: min(660px, calc(100dvh - var(--sheet-kb) - 40px));
+             viewport so the dimmed strip stays tappable on shorter devices.
+             The keyboard is allowed to overlay the sheet (incl. the footer
+             button) rather than resizing it — simpler and matches how the
+             native share sheet / most iOS keyboards behave. */
+          max-height: min(660px, calc(100vh - 40px));
+          max-height: min(660px, calc(100dvh - 40px));
           background: #fff;
           border-radius: 16px 16px 0 0;
           box-shadow: 0 -2px 16px rgba(17,17,17,.16);
@@ -349,6 +331,22 @@ export default function BottomSheet({
         .sheet-help { margin-top: 8px; font-size: 14px; color: ${GRAY}; line-height: 1.4; }
         .sheet-req { color: ${PINK}; margin-left: 2px; }
 
+        /* ---- DD / MM / YYYY segmented date entry ---- */
+        .sheet-dob {
+          display: flex; align-items: center; gap: 6px;
+          height: 56px; padding: 0 16px;
+          border: 1px solid ${BORDER}; border-radius: 4px; background: #fff;
+        }
+        .sheet-dob-seg {
+          flex: 0 0 28px; width: 28px; border: none; outline: none;
+          font-size: 16px; font-family: inherit; color: #111;
+          text-align: center; padding: 0; background: transparent;
+        }
+        .sheet-dob-seg-year { flex-basis: 46px; width: 46px; text-align: left; }
+        .sheet-dob-seg::placeholder { color: #b6b2c2; }
+        .sheet-dob-sep { color: ${GRAY}; }
+        .sheet-dob:focus-within { border-color: ${NAVY}; }
+
         select.form-input.sheet-select {
           -webkit-appearance: none; appearance: none;
           padding-right: 44px;
@@ -357,6 +355,37 @@ export default function BottomSheet({
           background-repeat: no-repeat;
           background-position: right 16px center;
         }
+
+        /* ---- Plan Benefits: sticky sub-header (logo + badge + tabs) ---- */
+        .sheet-subhead-row {
+          display: flex; align-items: flex-start; justify-content: space-between;
+          gap: 12px; width: 100%;
+        }
+        .sheet-subhead-uin { margin-top: 6px; font-size: 10px; color: ${GRAY}; }
+        .sheet-subhead-badge {
+          flex: none; padding: 4px 16px; border-radius: 20px;
+          background: linear-gradient(90deg, ${PINK}, ${NAVY});
+          color: #fff; font-size: 12px; font-weight: 500;
+        }
+        .sheet-tabs {
+          display: flex; gap: 24px; margin-top: 12px;
+          border-bottom: 1px solid ${BORDER};
+        }
+        .sheet-tab {
+          padding: 12px 0 10px; border: none; background: none; cursor: pointer;
+          font-size: 14px; font-weight: 500; color: rgba(0,0,0,.5);
+          border-bottom: 2px solid transparent; margin-bottom: -1px;
+        }
+        .sheet-tab[data-active="true"] {
+          color: ${NAVY}; border-bottom-color: ${NAVY};
+        }
+
+        /* ---- Plan Benefits: feature list ---- */
+        .sheet-feature-list { display: flex; flex-direction: column; gap: 16px; }
+        .sheet-feature-row { display: flex; gap: 8px; align-items: flex-start; }
+        .sheet-feature-icon { flex: none; width: 24px; height: 24px; }
+        .sheet-feature-title { font-size: 14px; font-weight: 600; color: #111; margin: 0 0 4px; }
+        .sheet-feature-desc { font-size: 12px; color: rgba(0,0,0,.6); line-height: 1.25; margin: 0; }
 
         /* ---- question card with chip answers ---- */
         .sheet-question {
@@ -478,7 +507,7 @@ export default function BottomSheet({
         ref={sheetRef}
         role="dialog"
         aria-modal="true"
-        aria-label={typeof title === "string" ? title : undefined}
+        aria-label={ariaLabel ?? (typeof title === "string" ? title : undefined)}
         tabIndex={-1}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -505,10 +534,12 @@ export default function BottomSheet({
           </button>
         </div>
 
-        <div className="sheet-head" data-sheet-grip>
-          <div className="sheet-title">{title}</div>
-          {subtitle ? <div className="sheet-subtitle">{subtitle}</div> : null}
-        </div>
+        {title ? (
+          <div className="sheet-head" data-sheet-grip>
+            <div className="sheet-title">{title}</div>
+            {subtitle ? <div className="sheet-subtitle">{subtitle}</div> : null}
+          </div>
+        ) : null}
 
         <div className="sheet-body" data-sheet-body ref={bodyRef}>
           {children}
