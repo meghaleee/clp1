@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, ReactNode } from "react";
+import { useEffect, useRef, useState, ReactNode, KeyboardEvent as RKeyboardEvent } from "react";
 import BottomSheet from "./BottomSheet";
 
 /* ================================================================
@@ -24,7 +24,8 @@ export interface CheckPremiumAnswers {
   age: number | null;
   gender: string;
   smokes: string;
-  sbiGroup: string;
+  staffBenefit: string;
+  differentlyAbled: string;
 }
 
 /* ---------- helpers ---------- */
@@ -75,6 +76,20 @@ export function ageFromISO(iso: string): number | null {
   return age >= 0 && age < 120 ? age : null;
 }
 
+/** "1994-11-26" -> { dd:"26", mm:"11", yyyy:"1994" } */
+function isoToSegments(iso: string): { dd: string; mm: string; yyyy: string } {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return { dd: "", mm: "", yyyy: "" };
+  return { yyyy: m[1], mm: m[2], dd: m[3] };
+}
+
+function isRealCalendarDate(y: string, m: string, d: string): boolean {
+  const yn = Number(y), mn = Number(m), dn = Number(d);
+  if (!yn || mn < 1 || mn > 12 || dn < 1 || dn > 31) return false;
+  const dt = new Date(yn, mn - 1, dn);
+  return dt.getFullYear() === yn && dt.getMonth() === mn - 1 && dt.getDate() === dn;
+}
+
 function maskPhone(p: string): string {
   const d = p.replace(/\D/g, "").slice(-10);
   return d.length === 10 ? `+91 ${d.slice(0, 5)} ${d.slice(5)}` : `+91 ${d}`;
@@ -83,7 +98,7 @@ function maskPhone(p: string): string {
 /* ---------- a radio group drawn as chips ---------- */
 
 function ChipGroup({
-  legend, name, options, value, onChange, required,
+  legend, name, options, value, onChange, required, note,
 }: {
   legend: string;
   name: string;
@@ -91,6 +106,8 @@ function ChipGroup({
   value: string;
   onChange: (v: string) => void;
   required?: boolean;
+  /** Optional helper copy shown inside the same card, below the chips. */
+  note?: ReactNode;
 }) {
   return (
     <fieldset className="sheet-question">
@@ -112,7 +129,96 @@ function ChipGroup({
           </label>
         ))}
       </div>
+      {note ? <div className="sheet-help" style={{ clear: "both" }}>{note}</div> : null}
     </fieldset>
+  );
+}
+
+/* ---------- Date of Birth: 3 auto-advancing segments ----------
+   Typing 2 digits into Day jumps to Month, 2 digits into Month jumps to
+   Year; Backspace on an empty segment jumps back to the previous one.
+   Keeps the same ISO (yyyy-mm-dd) contract as the native date input it
+   replaces, so ageFromISO / the rest of the form don't need to change. */
+
+function DobField({
+  value, onChange, max, ariaLabel = "Date of Birth",
+}: {
+  value: string;
+  onChange: (iso: string) => void;
+  /** ISO yyyy-mm-dd — values after this are rejected, same as the old max="" */
+  max?: string;
+  ariaLabel?: string;
+}) {
+  const initial = isoToSegments(value);
+  const [dd, setDd] = useState(initial.dd);
+  const [mm, setMm] = useState(initial.mm);
+  const [yyyy, setYyyy] = useState(initial.yyyy);
+  const ddRef = useRef<HTMLInputElement | null>(null);
+  const mmRef = useRef<HTMLInputElement | null>(null);
+  const yyyyRef = useRef<HTMLInputElement | null>(null);
+
+  /* stay in sync if the parent resets `value` (e.g. clearing the form) */
+  useEffect(() => {
+    const p = isoToSegments(value);
+    setDd(p.dd); setMm(p.mm); setYyyy(p.yyyy);
+  }, [value]);
+
+  const emit = (d: string, m: string, y: string) => {
+    if (d.length === 2 && m.length === 2 && y.length === 4 && isRealCalendarDate(y, m, d)) {
+      const iso = `${y}-${m}-${d}`;
+      onChange(max && iso > max ? "" : iso);
+    } else {
+      onChange("");
+    }
+  };
+
+  const onDay = (raw: string) => {
+    const v = raw.replace(/\D/g, "").slice(0, 2);
+    setDd(v);
+    emit(v, mm, yyyy);
+    if (v.length === 2) mmRef.current?.focus();
+  };
+  const onMonth = (raw: string) => {
+    const v = raw.replace(/\D/g, "").slice(0, 2);
+    setMm(v);
+    emit(dd, v, yyyy);
+    if (v.length === 2) yyyyRef.current?.focus();
+  };
+  const onYear = (raw: string) => {
+    const v = raw.replace(/\D/g, "").slice(0, 4);
+    setYyyy(v);
+    emit(dd, mm, v);
+  };
+
+  const backTo = (prev: () => void) => (e: RKeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !e.currentTarget.value) {
+      e.preventDefault();
+      prev();
+    }
+  };
+
+  return (
+    <div className="sheet-dob" role="group" aria-label={ariaLabel}>
+      <input
+        ref={ddRef} className="sheet-dob-seg" type="text" inputMode="numeric"
+        placeholder="DD" maxLength={2} value={dd} aria-label="Day"
+        onChange={(e) => onDay(e.target.value)}
+      />
+      <span className="sheet-dob-sep" aria-hidden="true">/</span>
+      <input
+        ref={mmRef} className="sheet-dob-seg" type="text" inputMode="numeric"
+        placeholder="MM" maxLength={2} value={mm} aria-label="Month"
+        onChange={(e) => onMonth(e.target.value)}
+        onKeyDown={backTo(() => ddRef.current?.focus())}
+      />
+      <span className="sheet-dob-sep" aria-hidden="true">/</span>
+      <input
+        ref={yyyyRef} className="sheet-dob-seg sheet-dob-seg-year" type="text" inputMode="numeric"
+        placeholder="YYYY" maxLength={4} value={yyyy} aria-label="Year"
+        onChange={(e) => onYear(e.target.value)}
+        onKeyDown={backTo(() => mmRef.current?.focus())}
+      />
+    </div>
   );
 }
 
@@ -201,7 +307,8 @@ export default function CheckPremiumSheet({
   const [dob, setDob] = useState("1994-11-26");
   const [gender, setGender] = useState("Male");
   const [smokes, setSmokes] = useState("Yes");
-  const [sbiGroup, setSbiGroup] = useState("No");
+  const [staffBenefit, setStaffBenefit] = useState("No");
+  const [differentlyAbled, setDifferentlyAbled] = useState("No");
   const [otp, setOtp] = useState("");
 
   const [resendLeft, restartResend] = useCountdown(open && step === "otp");
@@ -215,7 +322,7 @@ export default function CheckPremiumSheet({
   const age = ageFromISO(dob);
 
   const answers: CheckPremiumAnswers = {
-    sumAssured: numeric, term, dob, age, gender, smokes, sbiGroup,
+    sumAssured: numeric, term, dob, age, gender, smokes, staffBenefit, differentlyAbled,
   };
 
   type StepConfig = {
@@ -281,14 +388,7 @@ export default function CheckPremiumSheet({
               <span className="float-label">
                 Your Date of Birth<span className="req">*</span>
               </span>
-              <input
-                className="form-input"
-                type="date"
-                aria-label="Date of Birth"
-                value={dob}
-                max="2010-01-01"
-                onChange={(e) => setDob(e.target.value)}
-              />
+              <DobField value={dob} onChange={setDob} max="2010-01-01" ariaLabel="Date of Birth" />
             </div>
             <div className="sheet-help">
               {age == null ? "Enter a valid date of birth" : `Age: ${age} years`}
@@ -299,9 +399,13 @@ export default function CheckPremiumSheet({
             options={["Male", "Female", "Third Gender"]} value={gender} onChange={setGender} />
           <ChipGroup legend="Do you Smoke?" name="cp-smokes" required
             options={["Yes", "No"]} value={smokes} onChange={setSmokes} />
-          <ChipGroup
-            legend="Are you or your spouse currently working with or retired from the State Bank Group?"
-            name="cp-sbi" required options={["Yes", "No"]} value={sbiGroup} onChange={setSbiGroup} />
+
+          <ChipGroup legend="Is Staff Benefit applicable to you?" name="cp-staff-benefit" required
+            options={["Yes", "No"]} value={staffBenefit} onChange={setStaffBenefit}
+            note="Staff benefit (Discount / Additional Allocation) is applicable for employees, retired employees, VRS holders, minor children and spouse of employees of SBI Life Insurance Co. Ltd, State Bank of India, RRBs sponsored by State Bank of India and subsidiaries of State Bank Group" />
+
+          <ChipGroup legend="Are you differently abled?" name="cp-differently-abled" required
+            options={["Yes", "No"]} value={differentlyAbled} onChange={setDifferentlyAbled} />
         </>
       ),
     },

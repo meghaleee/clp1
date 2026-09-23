@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import CheckPremiumSheet from "./CheckPremiumSheet";
+import RequestCallbackSheet from "./RequestCallbackSheet";
+import PlanBenefitsSheet from "./PlanBenefitsSheet";
 
 /* ================================================================
    BRAND TOKENS — change here to update globally
@@ -125,6 +127,8 @@ export default function SBILifePage() {
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [premiumOpen, setPremiumOpen]       = useState(false);
+  const [callbackOpen, setCallbackOpen]     = useState(false);
+  const [benefitsOpen, setBenefitsOpen]     = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -995,7 +999,7 @@ export default function SBILifePage() {
                 {/* DESKTOP: subtitle = 16px/400 */}
                 Know all the benefits and features this policy has to offer
               </p>
-              <button className="btn-outline" style={{ marginTop: 32 }}>
+              <button className="btn-outline" style={{ marginTop: 32 }} onClick={() => setBenefitsOpen(true)}>
                 Check Benefits &amp; Features <ArrowSVG />
               </button>
             </div>
@@ -1158,7 +1162,10 @@ export default function SBILifePage() {
                 </span>
               </div>
             </div>
-            <button style={{ height: 56, padding: "0 32px", borderRadius: 999, border: "1.5px solid rgba(255,255,255,0.6)", background: "transparent", color: "#fff", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <button
+              style={{ height: 56, padding: "0 32px", borderRadius: 999, border: "1.5px solid rgba(255,255,255,0.6)", background: "transparent", color: "#fff", fontSize: 16, fontWeight: 700, display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}
+              onClick={() => setCallbackOpen(true)}
+            >
               {/* DESKTOP: callback button font size = 16px */}
               <PhoneSVG color="#fff" size={16} /> Request a Callback
             </button>
@@ -1259,6 +1266,26 @@ export default function SBILifePage() {
         open={premiumOpen}
         onClose={() => setPremiumOpen(false)}
         onCheckPremium={() => setPremiumOpen(false)}
+      />
+
+      {/* ============================================================
+          REQUEST A CALLBACK — triggered from the bottom contact banner
+      ============================================================ */}
+      <RequestCallbackSheet
+        open={callbackOpen}
+        onClose={() => setCallbackOpen(false)}
+        productName="SBI Life - Smart Shield Plus"
+      />
+
+      {/* ============================================================
+          PLAN BENEFITS — triggered from "Check Benefits & Features"
+      ============================================================ */}
+      <PlanBenefitsSheet
+        open={benefitsOpen}
+        onClose={() => setBenefitsOpen(false)}
+        productName="SBI Life - Smart Shield Plus"
+        uin="UIN: 111N150V01"
+        logoSrc={`${process.env.PUBLIC_URL}/smart-shield-plus.png`}
       />
     </div>
   );
