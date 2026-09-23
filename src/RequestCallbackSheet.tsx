@@ -173,9 +173,9 @@ export default function RequestCallbackSheet({
               <span className="float-label">Mobile<span className="req">*</span></span>
               {/* Inline height here overrides the CSS since this is a <div>
                   styled to look like .form-input, not an actual input —
-                  keep this in sync with .sheet-body .form-input (48px) in
+                  keep this in sync with .sheet-body .form-input (40px) in
                   BottomSheet.tsx if that ever changes. */}
-              <div className="form-input" style={{ display: "flex", alignItems: "center", gap: 8, height: 48, padding: "0 16px" }}>
+              <div className="form-input" style={{ display: "flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px" }}>
                 <span style={{ color: GRAY, fontSize: 14, display: "flex", alignItems: "center", gap: 4 }}>
                   <ChevronGlyph /> +91
                 </span>

@@ -129,7 +129,12 @@ function ChipGroup({
           </label>
         ))}
       </div>
-      {note ? <div className="sheet-help" style={{ clear: "both" }}>{note}</div> : null}
+      {/* .sheet-help's own margin-top (4px) is sized for a normal field hint.
+          This note sits further down — Figma's Question Fields spec calls
+          for 16px between the chip row and this kind of description text —
+          so it's overridden here rather than in the shared CSS, since this
+          is the only chip question that has a note under it. */}
+      {note ? <div className="sheet-help" style={{ clear: "both", marginTop: 16 }}>{note}</div> : null}
     </fieldset>
   );
 }

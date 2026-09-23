@@ -84,13 +84,17 @@ export default function PlanBenefitsSheet({
        .sheet-head — don't add a border here, see the note there. */
     <div style={{ textAlign: "left" }}>
       <div className="sheet-subhead-row">
-        {/* Product logo image — height 56px. If this image 404s (logoSrc
-            missing or wrong path), the text fallback below shows instead. */}
+        {/* Product logo image — height 80px. If this image 404s (logoSrc
+            missing or wrong path), the text fallback below shows instead.
+            Note: if the logo still looks small at this height, the PNG
+            itself likely has built-in transparent padding around the
+            mark — no CSS height value can fix that, the source image
+            would need to be re-exported cropped tighter. */}
         {logoSrc ? (
           <img
             src={logoSrc}
             alt={productName}
-            style={{ height: 60, objectFit: "contain" }}
+            style={{ height: 80, objectFit: "contain" }}
             onError={(e) => {
               const el = e.target as HTMLImageElement;
               el.style.display = "none";
@@ -135,7 +139,7 @@ export default function PlanBenefitsSheet({
   );
 
   return (
-    <BottomSheet open={open} onClose={onClose} title={subhead} ariaLabel={`${productName} — plan benefits`}>
+    <BottomSheet open={open} onClose={onClose} title={subhead} tightHead ariaLabel={`${productName} — plan benefits`}>
       {tab === "features" ? (
         <>
           <p style={{ fontSize: 16, fontWeight: 600, color: NAVY, margin: "0 0 16px" }}>Features</p>

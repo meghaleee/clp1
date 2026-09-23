@@ -15,6 +15,10 @@ export interface BottomSheetProps {
   /** Falls back to `title` when it's a string. Set this when there's no title block but the sheet still needs a label. */
   ariaLabel?: string;
   subtitle?: ReactNode;
+  /** For a sheet with a custom title block that already draws its own
+   *  bottom spacing (e.g. Plan Benefits' tabs row) — removes .sheet-head's
+   *  own bottom padding so the two don't stack up into extra gap. */
+  tightHead?: boolean;
   children: ReactNode;
   footer?: ReactNode;
   /** Small line above the footer button, e.g. "While you wait…". */
@@ -45,6 +49,7 @@ export default function BottomSheet({
   title,
   ariaLabel,
   subtitle,
+  tightHead,
   children,
   footer,
   footerNote,
@@ -339,6 +344,14 @@ export default function BottomSheet({
           cursor: grab; touch-action: none;
         }
         .sheet-head:active { cursor: grabbing; }
+        /* Plan Benefits passes tightHead because its own tabs row already
+           ends with 16px of breathing room built in (.sheet-tabs' margin-top
+           + .sheet-tab's own padding) — without this, .sheet-head's extra
+           20px bottom padding stacked on top of that and pushed the divider
+           line ~30px below the tabs instead of Figma's 16px. This zeroes
+           .sheet-head's own bottom padding for that one case only; every
+           other sheet (plain text titles) keeps the normal 20px. */
+        .sheet-head[data-tight-head="true"] { padding-bottom: 0; }
         /* Plain-text title styling (Check Premium's "Help us with a few basic details" etc). */
         .sheet-title {
           font-size: 24px; font-weight: 700; color: ${NAVY};
@@ -378,13 +391,19 @@ export default function BottomSheet({
 
         /* ---- form fields: reuse .form-input and .float-label from SBILifePage ---- */
         .sheet-field { margin-bottom: 16px; }   /* gap below each field */
-        .sheet-help { margin-top: 8px; font-size: 14px; color: ${GRAY}; line-height: 1.4; }   /* small grey helper text under a field */
+        /* Hint/helper text under a field — per the Molecules "Input Fields"
+           spec this is 12px text, 4px below the box (e.g. "Rupees One Lakh",
+           "Age: 31 years", "As per Govt. ID proof", "We don't spam"). */
+        .sheet-help { margin-top: 4px; font-size: 12px; color: ${GRAY}; line-height: 1.4; }
         .sheet-req { color: ${PINK}; margin-left: 2px; }   /* the red/pink "*" for required fields */
 
-        /* .form-input on the main page (hero form) is 56px tall — inside a
-           sheet it's shorter, 48px, per design. Scoped to ".sheet-body" so
-           this ONLY affects fields inside a sheet, never the hero form. */
-        .sheet-body .form-input { height: 48px; }
+        /* .form-input on the main page (hero form) is 56px tall. Inside a
+           sheet, the Molecules "Text Input / Dropdown / Mobile Number"
+           components spec the actual bordered box at 40px (the floating
+           label sits above it and isn't part of this height). Scoped to
+           ".sheet-body" so this ONLY affects fields inside a sheet, never
+           the hero form. */
+        .sheet-body .form-input { height: 40px; }
 
         /* ============================================================
            DATE OF BIRTH — the DD / MM / YYYY segmented input on Check
@@ -392,7 +411,7 @@ export default function BottomSheet({
         ============================================================ */
         .sheet-dob {
           display: flex; align-items: center; gap: 6px;   /* gap between DD, /, MM, /, YYYY */
-          height: 48px; padding: 0 16px;   /* BOX HEIGHT — matches other sheet fields (48px) */
+          height: 40px; padding: 0 16px;   /* BOX HEIGHT — matches other sheet fields (40px, per Molecules Date Input) */
           border: 1px solid ${BORDER}; border-radius: 4px; background: #fff;
         }
         .sheet-dob-seg {
@@ -443,7 +462,7 @@ export default function BottomSheet({
           display: flex; gap: 24px; margin-top: 12px;   /* gap between "Features" / "Advantages" / "Plan Benefits" */
         }
         .sheet-tab {
-          padding: 12px 0 10px; border: none; background: none; cursor: pointer;
+          padding: 16px 0; border: none; background: none; cursor: pointer;   /* Figma spec: 16px above/below tab text */
           font-size: 14px; font-weight: 500; color: rgba(0,0,0,.5);   /* inactive tab text color */
           border-bottom: 2px solid transparent; margin-bottom: -1px;
         }
@@ -469,19 +488,24 @@ export default function BottomSheet({
         .sheet-question-label {
           /* float + full width stops <legend> notching the border */
           float: left; width: 100%; padding: 0;
-          font-size: 16px; font-weight: 700; color: #111; line-height: 1.35;
+          /* Question Fields component spec: 14px SemiBold */
+          font-size: 14px; font-weight: 600; color: #111; line-height: 1.35;
         }
         .sheet-chips {
-          clear: both; display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px;   /* gap between chip buttons */
+          /* Question Fields (Stacked) spec: 12px gap from the label above,
+             8px gap between each chip button */
+          clear: both; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
         }
         .sheet-chip { position: relative; }
         .sheet-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
         .sheet-chip span {
           display: flex; align-items: center; justify-content: center;
-          min-height: 36px; padding: 0 14px;   /* chip button size */
+          /* Chips component spec: Small size = 36px tall, 60px min width,
+             16px horizontal / 12px vertical padding, 12px Medium text */
+          min-height: 36px; min-width: 60px; padding: 12px 16px;
           border: 1px solid ${BORDER}; border-radius: 8px;
           background: #fff; color: ${NAVY};
-          font-size: 16px; line-height: 1.2; cursor: pointer;
+          font-size: 12px; font-weight: 500; line-height: 1.2; cursor: pointer;
         }
         .sheet-chip input:checked + span {
           background: ${NAVY}; border-color: ${NAVY}; color: #fff; font-weight: 700;   /* selected chip look */
@@ -618,7 +642,7 @@ export default function BottomSheet({
         </div>
 
         {title ? (
-          <div className="sheet-head" data-sheet-grip>
+          <div className="sheet-head" data-sheet-grip data-tight-head={tightHead ? "true" : undefined}>
             <div className="sheet-title">{title}</div>
             {subtitle ? <div className="sheet-subtitle">{subtitle}</div> : null}
           </div>
