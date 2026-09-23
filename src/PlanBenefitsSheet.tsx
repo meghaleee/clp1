@@ -7,7 +7,7 @@ const GRAY = "#6f6f6f";
 
 /* Same tiny helper SBILifePage uses for its own feature icons —
    `name` maps to /public/icons/<name>.svg. */
-const Icon = ({ name, size = 60 }: { name: string; size?: number }) => (
+const Icon = ({ name, size = 24 }: { name: string; size?: number }) => (
   <img
     src={`./icons/${name}.svg`}
     alt=""
@@ -90,7 +90,7 @@ export default function PlanBenefitsSheet({
           <img
             src={logoSrc}
             alt={productName}
-            style={{ height: 56, objectFit: "contain" }}
+            style={{ height: 60, objectFit: "contain" }}
             onError={(e) => {
               const el = e.target as HTMLImageElement;
               el.style.display = "none";

@@ -323,7 +323,7 @@ export default function BottomSheet({
 
         /* ============================================================
            HEAD / TITLE BLOCK — only renders when a sheet passes a
-           `title` prop (Check Premium's steps, Plan Benefits' custom
+           "title" prop (Check Premium's steps, Plan Benefits' custom
            logo+tabs block). Sits below the top bar, above the scrolling
            body, and never scrolls itself.
            NOTE: this is where the divider line usually comes from
@@ -360,7 +360,7 @@ export default function BottomSheet({
         }
 
         /* FOOTER — the primary button area pinned to the bottom (e.g.
-           "Continue"). Only renders when a sheet passes a `footer` prop;
+           "Continue"). Only renders when a sheet passes a "footer" prop;
            never scrolls. */
         .sheet-foot {
           flex: none; background: #fff;
@@ -381,13 +381,18 @@ export default function BottomSheet({
         .sheet-help { margin-top: 8px; font-size: 14px; color: ${GRAY}; line-height: 1.4; }   /* small grey helper text under a field */
         .sheet-req { color: ${PINK}; margin-left: 2px; }   /* the red/pink "*" for required fields */
 
+        /* .form-input on the main page (hero form) is 56px tall — inside a
+           sheet it's shorter, 48px, per design. Scoped to ".sheet-body" so
+           this ONLY affects fields inside a sheet, never the hero form. */
+        .sheet-body .form-input { height: 48px; }
+
         /* ============================================================
            DATE OF BIRTH — the DD / MM / YYYY segmented input on Check
            Premium's details step.
         ============================================================ */
         .sheet-dob {
           display: flex; align-items: center; gap: 6px;   /* gap between DD, /, MM, /, YYYY */
-          height: 56px; padding: 0 16px;   /* BOX HEIGHT — matches other fields */
+          height: 48px; padding: 0 16px;   /* BOX HEIGHT — matches other sheet fields (48px) */
           border: 1px solid ${BORDER}; border-radius: 4px; background: #fff;
         }
         .sheet-dob-seg {
@@ -415,7 +420,7 @@ export default function BottomSheet({
            PLAN BENEFITS — sticky sub-header (product logo + "Protection
            Plan" badge + Features/Advantages/Plan Benefits tabs).
            This whole block is passed in as PlanBenefitsSheet.tsx's
-           `title` prop, so it renders inside .sheet-head above, and gets
+           "title" prop, so it renders inside .sheet-head above, and gets
            its divider line from .sheet-head's own border-bottom — NOT
            from anything in this section. (Logo size itself is set in
            PlanBenefitsSheet.tsx, not here — search that file for "height: 56".)
@@ -473,7 +478,7 @@ export default function BottomSheet({
         .sheet-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
         .sheet-chip span {
           display: flex; align-items: center; justify-content: center;
-          min-height: 44px; padding: 0 14px;   /* chip button size */
+          min-height: 36px; padding: 0 14px;   /* chip button size */
           border: 1px solid ${BORDER}; border-radius: 8px;
           background: #fff; color: ${NAVY};
           font-size: 16px; line-height: 1.2; cursor: pointer;
