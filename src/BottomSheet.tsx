@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, ReactNode, PointerEvent as RPointerEven
 import { createPortal } from "react-dom";
 
 /* Tokens copied from SBILifePage so this file stays self-contained. */
-const NAVY = "#2a2076";
+const NAVY = "#280071";
 const PINK = "#D60D47";
 const BORDER = "#e4e0eb";
 const GRAY = "#6f6f6f";
@@ -311,11 +311,11 @@ export default function BottomSheet({
         }
         /* Invisible placeholder the same size as the Close button, used to
            keep Close centered/right-aligned when there's no Back button. */
-        .sheet-topbar-spacer { width: 36px; height: 36px; }
+        .sheet-topbar-spacer { width: 32px; height: 32px; }
 
         /* Back arrow button AND Close (X) button — same circle size for both. */
         .sheet-back, .sheet-close {
-          width: 36px; height: 36px;   /* CIRCLE SIZE — the tappable button size */
+          width: 32px; height: 32px;   /* CIRCLE SIZE — the tappable button size */
           padding: 2px;
           display: flex; align-items: center; justify-content: center;
           border: none; border-radius: 50%; cursor: pointer;
@@ -417,7 +417,7 @@ export default function BottomSheet({
         .sheet-dob-seg {
           flex: 0 0 28px; width: 28px;   /* width of the DD and MM boxes */
           border: none; outline: none;
-          font-size: 16px; font-family: inherit; color: #111;
+          font-size: 14px; font-family: inherit; color: #111;
           text-align: center; padding: 0; background: transparent;
         }
         .sheet-dob-seg-year { flex-basis: 46px; width: 46px; text-align: left; }   /* wider YYYY box */
@@ -492,9 +492,9 @@ export default function BottomSheet({
           font-size: 14px; font-weight: 600; color: #111; line-height: 1.35;
         }
         .sheet-chips {
-          /* Question Fields (Stacked) spec: 12px gap from the label above,
+          /* gap from the question label above the chip row is 16px;
              8px gap between each chip button */
-          clear: both; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
+          clear: both; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
         }
         .sheet-chip { position: relative; }
         .sheet-chip input { position: absolute; opacity: 0; width: 0; height: 0; }
@@ -634,7 +634,7 @@ export default function BottomSheet({
             <span className="sheet-topbar-spacer" aria-hidden="true" />
           )}
           <button type="button" className="sheet-close" onClick={close} aria-label="Close">
-            <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="2.2"
                 strokeLinecap="round" />
             </svg>

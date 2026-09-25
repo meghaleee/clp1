@@ -1,7 +1,7 @@
 import { useState } from "react";
 import BottomSheet from "./BottomSheet";
 
-const NAVY = "#2a2076";
+const NAVY = "#280071";
 const PINK = "#D60D47";
 const GRAY = "#6f6f6f";
 

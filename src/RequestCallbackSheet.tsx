@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import BottomSheet from "./BottomSheet";
 
 /* Tokens copied from SBILifePage / BottomSheet so this file stays self-contained. */
-const NAVY = "#2a2076";
+const NAVY = "#280071";
 const GRAY = "#6f6f6f";
 const BORDER = "#e4e0eb";
 
